@@ -10,9 +10,9 @@ Group files in different folders of eron data set under a folder which contains 
 
 import os
 
-path = "/Users/susmitvengurlekar/Downloads/Spam/BG/"
-path_to_header_folder = "/Users/susmitvengurlekar/Downloads/Spam/headers"
-os.chdir("/Users/susmitvengurlekar/Downloads/Spam/BG")
+path = "/Users/susmitvengurlekar/Email/Data/Raw_Data/BG (Spam)/"
+path_to_header_folder = "/Users/susmitvengurlekar/Email/Data/Grouped_Data/Spam/headers/text"
+os.chdir(path)
 for year in os.listdir():
     if year != ".DS_Store":
         os.chdir(path + f"{year}/")
