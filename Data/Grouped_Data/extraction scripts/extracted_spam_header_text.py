@@ -10,10 +10,11 @@ Created on Mon May 25 11:03:40 2020
 
 import re
 import os
-
+from email.parser import HeaderParser
 import csv
 
 path_to_spam_header_csv = "/Users/susmitvengurlekar/Email/Data/Grouped_Data/csvs/extracted_spam_header_text.csv"
+path_to_spam_header_body_csv = "/Users/susmitvengurlekar/Email/Data/Grouped_Data/csvs/extracted_spam_header_body_text.csv"
 path_to_spam_header = "/Users/susmitvengurlekar/Email/Data/Grouped_Data/Spam/headers/text"
 
 # Regex Patterns
@@ -24,13 +25,20 @@ reply_to_email_pattern = re.compile(r"<.+>")
 subject_line_pattern = re.compile(r"Subject: .+")
 inline_image_pattern = re.compile(r"img +src",flags=re.IGNORECASE)
 
-field_names = ["sender_email","reply_to_email","subject","inline_image_count","Label"]
+field_names = ["sender_email","reply_to_email","return_path","inline_image_count","Label"]
 csv_file = open(path_to_spam_header_csv,"w")
 writer = csv.DictWriter(csv_file,fieldnames=field_names)
 writer.writeheader()
 
+body_field_names = ["Subject","Text","Label"]
+body_csv_file = open(path_to_spam_header_body_csv,"w")
+body_writer = csv.DictWriter(body_csv_file,fieldnames=body_field_names)
+body_writer.writeheader()
+
 os.chdir(path_to_spam_header)
 row = {"Label":"Spam"}
+body_row = {"Label":"Spam"}
+parser = HeaderParser()
 
 for file in os.listdir():
     f = open(file,"r",encoding="latin-1")
@@ -38,27 +46,48 @@ for file in os.listdir():
     f.close()
 
     try:
-        from_text = re.search(from_pattern,txt).group()
-        sender_email = re.search(sender_email_pattern,from_text).group()
-        row["sender_email"] = sender_email
-    
+        h = parser.parsestr(txt)
+        
+        from_text = h["From"]
+        if from_text == None:
+            from_text=""
         try:
-            reply_to_text = re.search(reply_to_pattern,txt).group()
+            sender_email = re.search(sender_email_pattern,from_text).group()
+            row["sender_email"] = sender_email
+        except AttributeError as e:
+            row["sender_email"] = ""
+    
+        reply_to_text = h["Reply-To"]
+        if reply_to_text == None:
+            reply_to_text = ""
+        try:
+            reply_to_text = re.search(sender_email_pattern,reply_to_text).group()
+            row["reply_to_email"] = reply_to_text
+        except AttributeError as e:
+            row["reply_to_email"] = ""
         
-            reply_to_email = re.search(reply_to_email_pattern,reply_to_text).group()[1:-1]
-            row["reply_to_email"] = reply_to_email
-        except AttributeError:
-            row["reply_to_email"] = "None"
-        
-        
-        subject_line = re.search(subject_line_pattern,txt).group()
-        subject_text = subject_line[9:]
-        row["subject"] = subject_text
-        
-        
+        return_path_text = h["Return-Path"]
+        if return_path_text == None:
+            return_path_text = ""
+        try:
+            return_path = re.search(sender_email_pattern,return_path_text).group()
+            row["return_path"] = return_path
+        except AttributeError as e:
+            row["return_path"] = ""
+
         inline_images = re.findall(inline_image_pattern,txt)
         row["inline_image_count"] = len(inline_images)
         
         writer.writerow(row)
-    except AttributeError:
-        continue
+        
+      
+        
+        payload = h.get_payload()
+        
+        body_row["Subject"] = h["Subject"]
+        body_row["Text"] = payload
+        body_writer.writerow(body_row)
+        
+        
+    except AttributeError as e:
+        print(e)

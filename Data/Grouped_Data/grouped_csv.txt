@@ -4,8 +4,9 @@ Ham header => extracted_ham_header.csv
 Spam header email => extracted_spam_header.csv
 Spam header subject, body  => extracted_spam_body.csv
 Ham header subject, body => extracted_ham_body.csv
+Spam header text subject,body => extracted_spam_header_body_text.csv
 
 extracted_spam_header_text.csv + extracted_ham_header.csv + extracted_spam_header.csv = extracted_header.csv (Raw Data for Data Wrangling)
 
-extracted_body.csv + extracted_spam_body.csv + extracted_ham_body.csv = extracted_body.csv (Raw Data for Data Wrangling) 
+extracted_spam_header_body_text.csv + extracted_body.csv + extracted_spam_body.csv + extracted_ham_body.csv = extracted_body.csv (Raw Data for Data Wrangling) 
 

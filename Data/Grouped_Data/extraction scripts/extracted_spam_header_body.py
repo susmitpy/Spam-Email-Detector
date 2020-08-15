@@ -29,10 +29,10 @@ path_to_body_csv_file = "/Users/susmitvengurlekar/Email/Data/Grouped_Data/csvs/e
 parser = HeaderParser()
 
 
-header_row = {"sender_email":"","reply_to_email":"","subject":"","inline_image_count":"","Label":"Spam"}
+header_row = {"sender_email":"","reply_to_email":"","inline_image_count":"","Label":"Spam"}
 body_row = {"Subject":"","Text":"","Label":"Spam"}
 
-header_field_names = ["sender_email","reply_to_email","subject","inline_image_count","Label"]
+header_field_names = ["sender_email","reply_to_email","return_path","inline_image_count","Label"]
 header_csv_file = open(path_to_header_csv_file,"w")
 header_writer = csv.DictWriter(header_csv_file,fieldnames=header_field_names)
 header_writer.writeheader()
@@ -45,20 +45,40 @@ body_writer.writeheader()
 
 a = os.listdir(path_to_email_headers)
 for f in a:
-    header_row = {"sender_email":"","reply_to_email":"","subject":"","inline_image_count":"","Label":"Spam"}
+    header_row = {"sender_email":"","reply_to_email":"","return_path":"","inline_image_count":"","Label":"Spam"}
     body_row = {"Subject":"","Text":"","Label":"Spam"}
     try:
         mail = open(path_to_email_headers+f,"r")
+        
         h = parser.parsestr(mail.read())
         
-        sender_mail = re.search(sender_mail_pattern,h["From"]).group()
-        header_row["sender_email"] = sender_mail
+        from_text = h["From"]
+        if from_text == None:
+            from_text=""
+        try:
+            sender_email = re.search(sender_mail_pattern,from_text).group()
+            header_row["sender_email"] = sender_email
+        except AttributeError as e:
+            header_row["sender_email"] = ""
+    
+        reply_to_text = h["Reply-To"]
+        if reply_to_text == None:
+            reply_to_text = ""
+        try:
+            reply_to_text = re.search(sender_mail_pattern,reply_to_text).group()
+            header_row["reply_to_email"] = reply_to_text
+        except AttributeError as e:
+            header_row["reply_to_email"] = ""
         
-        return_path = re.search(sender_mail_pattern,h["Return-Path"]).group()
-        header_row["reply_to_email"] = return_path
+        return_path_text = h["Return-Path"]
+        if return_path_text == None:
+            return_path_text = ""
+        try:
+            return_path = re.search(sender_mail_pattern,return_path_text).group()
+            header_row["return_path"] = return_path
+        except AttributeError as e:
+            header_row["return_path"] = ""
         
-
-        header_row["subject"] = h["Subject"][4:]
         
         body_row["Subject"] = h["Subject"][4:]
         body_row["Text"] = h.get_payload()
