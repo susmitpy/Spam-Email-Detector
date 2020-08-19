@@ -52,8 +52,8 @@ def is_actual_word(x,first_n_chars=3):
     
     return is_actual_word(x,first_n_chars=first_n_chars+1)
 
-df["real_word_in_account"] = df["account_name"].map(is_actual_word)
+df["real_word_account_start"] = df["account_name"].map(is_actual_word)
 
-df = df[["real_word_in_account","has_inline_image","no_return_path","no_reply_no_return","yes_reply_no_return","free_in_domain","Label"]]
+df = df[["real_word_account_start","has_inline_image","no_return_path","no_reply_no_return","yes_reply_no_return","free_in_domain","Label"]]
 
 df.to_csv("../Processed Data/header.csv",index=False)
