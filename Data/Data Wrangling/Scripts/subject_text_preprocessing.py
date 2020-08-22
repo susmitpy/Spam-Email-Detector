@@ -12,6 +12,14 @@ df["Subject"] = df["Subject"].fillna("")
 df["Text"] = df["Text"].fillna("")
 
 df["is_html"] = df["Text"].map(lambda x: "<html" in str(x).lower() or "< html" in str(x).lower())
+df["http_count"] = df["Text"].str.count("http")
+
+url_pattern = re.compile(r"(https?://[\w\.]+)",re.IGNORECASE)
+def url_count_in_text(text):
+    url_free_text = re.sub(url_pattern,"",text)
+    return url_free_text
+df["Text"] = df["Text"].map(url_count_in_text)
+
 df["Text"] = df["Text"].str.lower().str.findall(r"[a-z]+")
 
 remove_words = set(stopwords.words())
@@ -36,7 +44,7 @@ def html_removal(text):
     return text
 df["Text"] = df["Text"].map(html_removal)
 
-remove_phase_two = ["text plain","content transfer","charset","us ascii","format","encoding","multipart","body","html","head","title","meta"]
+remove_phase_two = ["part message mime","multipart message mime","text plain","content transfer","charset","us ascii","format","encoding","multipart","body","html","head","title","meta"]
 def phase_two(text):
     for remove in remove_phase_two:
         text = text.replace(remove,"")
