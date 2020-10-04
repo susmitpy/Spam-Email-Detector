@@ -1,4 +1,4 @@
-import pandas as pd
+oimport pandas as pd
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 
@@ -16,6 +16,8 @@ df["Subject"] = df["Subject"].map(lambda x: word_tokenize(x))
 
 df["Text"] = df["Text"].map(stem_text)
 df["Subject"] = df["Subject"].map(stem_text)
+
+
 
 nlp_data = df[["Subject","Text","Label"]]
 nlp_data = nlp_data.dropna()
